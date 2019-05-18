@@ -32,7 +32,7 @@ import javax.swing.UnsupportedLookAndFeelException;
  * @author WissenIstNacht
  * @date 18.05.2019
  */
-public class Game implements KeyListener {
+public class Game {
 
 	private JFrame window;
 	private JMenuBar jmb;
@@ -48,6 +48,7 @@ public class Game implements KeyListener {
 
 	private GameState state;
 
+	
 	public Game() {
 		state = GameState.Welcome;
 
@@ -67,10 +68,15 @@ public class Game implements KeyListener {
 
 		window.add(jmb, BorderLayout.NORTH);
 		window.add(pnl_welcome, BorderLayout.CENTER);
-		window.addKeyListener(this);
+//		window.addKeyListener(this);
 		window.setVisible(true);
 	}
 
+	
+	/*******************************************************************************/
+			/* Game Methods */
+	/*******************************************************************************/
+	
 	/** This is the game loop.
 	 * 
 	 * This function runs until a player presses escape or the window is closed.
@@ -121,8 +127,8 @@ public class Game implements KeyListener {
 		}
 	}
 
-	/**
-	 * Decides in each frame whether the game is over.
+		
+	/** Decides in each frame whether the game is over.
 	 * 
 	 * @return true iff the game over condition is met
 	 */
@@ -130,8 +136,8 @@ public class Game implements KeyListener {
 		return b.xPos <= 0 || b.xPos >= pnl_play.getWidth();
 	}
 
-	/**
-	 * Transitions between Welcome and Running state of game.
+	
+	/** Transitions between Welcome and Running state of game.
 	 * 
 	 * This happens when a button in the welcome screen fires. I.e., when a game
 	 * mode has been chosen. Transitioning from Welcome to Running means
@@ -142,13 +148,11 @@ public class Game implements KeyListener {
 	 */
 	public void welcomeToRunning(boolean single) {
 		// remove game screen and listeners
-		pnl_welcome.removeKeyListener(Game.this);
 		window.remove(pnl_welcome);
 
 		// add GS screen and listeners
 		window.add(pnl_play, BorderLayout.CENTER);
 		pnl_play.requestFocusInWindow();
-		pnl_play.addKeyListener(Game.this);
 		window.setVisible(true);
 
 		// instantiate game objects
@@ -157,6 +161,7 @@ public class Game implements KeyListener {
 			singlePlayer = true;
 			p2 = new Bot(pnl_play.getWidth(), pnl_play.getHeight());
 		} else {
+			singlePlayer = false;
 			p2 = new Player(pnl_play.getWidth(), pnl_play.getHeight(), 1);
 		}
 		b = new Ball(pnl_play.getWidth() / 2, pnl_play.getHeight() / 2);
@@ -165,6 +170,7 @@ public class Game implements KeyListener {
 		pnl_play.repaint();
 	}
 
+	
 	/** Transitions between Running and gameover state.
 	 * 
 	 * This happens when GO is detected. Transitioning from Running to GO means
@@ -172,19 +178,18 @@ public class Game implements KeyListener {
 	 */
 	public void runningToOver() {
 		// remove game screen and listeners
-		pnl_play.removeKeyListener(Game.this);
 		window.remove(pnl_play);
 
 		// add GO screen and listeners
 		window.add(pnl_gameover, BorderLayout.CENTER);
 		pnl_gameover.requestFocusInWindow();
-		pnl_gameover.addKeyListener(Game.this);
 		window.setVisible(true);
 
 		// once everything's set draw on GO screen canvas
 		pnl_gameover.repaint();
 	}
 
+	
 	/** Transitions between GO and Welcome state of game.
 	 * 
 	 * This happens when GO is detected. Transitioning from Running to GO means
@@ -192,73 +197,19 @@ public class Game implements KeyListener {
 	 */
 	public void overToWelcome() {
 		// remove game screen and listeners
-		pnl_gameover.removeKeyListener(Game.this);
 		window.remove(pnl_gameover);
 
 		// add GO screen and listeners
 		window.add(pnl_welcome, BorderLayout.CENTER);
 		pnl_welcome.requestFocusInWindow();
-		pnl_welcome.addKeyListener(Game.this);
 		window.setVisible(true);
 
 		// once everything's set draw on GO screen canvas
 		pnl_welcome.repaint();
 	}
 	
-	private enum GameState {
-		Welcome, Running, Paused, Settings, Over;
-	}
-
+	
 	/*******************************************************************************/
-	/* *LISTENERS* */
-	/*******************************************************************************/
-	public void keyPressed(KeyEvent ke) {
-		switch (ke.getKeyCode()) {
-		case KeyEvent.VK_W:
-			p1.setMovement(-1);
-			break;
-		case KeyEvent.VK_S:
-			p1.setMovement(1);
-			break;
-		case KeyEvent.VK_UP:
-			p2.setMovement(-1);
-			break;
-		case KeyEvent.VK_DOWN:
-			p2.setMovement(1);
-			break;
-		case KeyEvent.VK_P:
-			if (state == GameState.Running)
-				state = GameState.Paused;
-			else if (state == GameState.Paused)
-				state = GameState.Running;
-			break;
-		default:
-			break;
-		}
-	}
-
-	public void keyReleased(KeyEvent ke) {
-		switch (ke.getKeyCode()) {
-		case KeyEvent.VK_W:
-			p1.setMovement(0);
-			break;
-		case KeyEvent.VK_S:
-			p1.setMovement(0);
-			break;
-		case KeyEvent.VK_UP:
-			p2.setMovement(0);
-			break;
-		case KeyEvent.VK_DOWN:
-			p2.setMovement(0);
-			break;
-		default:
-			break;
-		}
-	}
-
-	public void keyTyped(KeyEvent ke) {
-	}
-
 	/*******************************************************************************/
 	/* *MAIN* */
 	/*******************************************************************************/
@@ -292,7 +243,7 @@ public class Game implements KeyListener {
 	 * 
 	 * @author WissenIstNacht
 	 */
-	class PlayScreen extends JPanel {
+	class PlayScreen extends JPanel implements KeyListener{
 		private static final long serialVersionUID = 6698027035721355452L;
 		
 		JLabel lbl_paused;
@@ -300,6 +251,7 @@ public class Game implements KeyListener {
 		public PlayScreen() {
 			setBackground(Color.BLACK);
 			setLayout(new GridBagLayout());
+			this.addKeyListener(this);
 			
 			lbl_paused = new JLabel("PAUSED");
 			lbl_paused.setFont(new Font("Verdana", Font.BOLD, 50));
@@ -327,6 +279,53 @@ public class Game implements KeyListener {
 			p1.draw(g);
 			p2.draw(g);
 			b.draw(g);
+		}
+	
+		public void keyPressed(KeyEvent ke) {
+			switch (ke.getKeyCode()) {
+			case KeyEvent.VK_W:
+				p1.setMovement(-1);
+				break;
+			case KeyEvent.VK_S:
+				p1.setMovement(1);
+				break;
+			case KeyEvent.VK_UP:
+				p2.setMovement(-1);
+				break;
+			case KeyEvent.VK_DOWN:
+				p2.setMovement(1);
+				break;
+			case KeyEvent.VK_P:
+				if (state == GameState.Running)
+					state = GameState.Paused;
+				else if (state == GameState.Paused)
+					state = GameState.Running;
+				break;
+			default:
+				break;
+			}
+		}
+
+		public void keyReleased(KeyEvent ke) {
+			switch (ke.getKeyCode()) {
+			case KeyEvent.VK_W:
+				p1.setMovement(0);
+				break;
+			case KeyEvent.VK_S:
+				p1.setMovement(0);
+				break;
+			case KeyEvent.VK_UP:
+				p2.setMovement(0);
+				break;
+			case KeyEvent.VK_DOWN:
+				p2.setMovement(0);
+				break;
+			default:
+				break;
+			}
+		}
+
+		public void keyTyped(KeyEvent ke) {
 		}
 	}
 

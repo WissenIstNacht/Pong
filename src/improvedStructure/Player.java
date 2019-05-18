@@ -10,7 +10,7 @@ import java.awt.Graphics;
  * screen ("Paddle"). A player can move up or down within the boundary of the game
  * window.
  * 
- * @author Valentin
+ * @author WissenIstNacht
  *
  */
 public class Player {

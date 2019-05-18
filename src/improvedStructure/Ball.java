@@ -9,7 +9,7 @@ import java.awt.Graphics;
  * direction. It physically interacts with it's environment. This is handled by 
  * collision detection functions. 
  * 
- * @author Valentin
+ * @author WissenIstNacht
  *
  */
 public class Ball {
@@ -29,7 +29,8 @@ public class Ball {
 		speed = 5;
 		radius = 20;
 		
-		angle = Math.random()*Math.PI*2;	//at game start direction is random.
+//		angle = Math.random()*Math.PI*2;	//at game start direction is random.
+		angle = 0;	//at game start direction is random.
 		xVel = speed * Math.cos(angle);
 		yVel = speed * -Math.sin(angle);
 	}
