@@ -22,6 +22,8 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import screens.*;
+
 /** This is an implementation of the classic Pong game.
  * 
  * The game at the moment provides a game mode for single and two player. The game
@@ -40,21 +42,22 @@ public class Game {
 	// Different JPanels for different game screens
 	private JPanel pnl_welcome, pnl_play, pnl_gameover;
 
-	private Ball b;
-	private Player p1, p2;
+	public Ball b;
+	public Player p1;
+	public Player p2;
 
 	private boolean exit;
 	private boolean singlePlayer;
 
-	private GameState state;
+	public GameState state;
 
 	
 	public Game() {
 		state = GameState.Welcome;
 
 		/* Init Gui Components */
-		pnl_welcome = new WelcomeScreen();
-		pnl_play = new PlayScreen();
+		pnl_welcome = new WelcomeScreen(this);
+		pnl_play = new PlayScreen(this);
 		pnl_gameover = new GOScreen();
 
 		jmb = new JMenuBar();
@@ -229,204 +232,7 @@ public class Game {
 		g.run();
 	}
 
-	/*******************************************************************************/
-	/* *INNER CLASS GameSCREEN* */
-	/*******************************************************************************/
 
-	/**
-	 * Panel on which the actual playing is drawn.
-	 * 
-	 * This class's only job is to call the various object's draw methods (ball,
-	 * player, etc) and pass them the graphics object g. In order to do so the
-	 * class extends JPanel, which allows to override the paint component
-	 * method.
-	 * 
-	 * @author WissenIstNacht
-	 */
-	class PlayScreen extends JPanel implements KeyListener{
-		private static final long serialVersionUID = 6698027035721355452L;
-		
-		JLabel lbl_paused;
-
-		public PlayScreen() {
-			setBackground(Color.BLACK);
-			setLayout(new GridBagLayout());
-			this.addKeyListener(this);
-			
-			lbl_paused = new JLabel("PAUSED");
-			lbl_paused.setFont(new Font("Verdana", Font.BOLD, 50));
-			lbl_paused.setForeground(Color.WHITE);	// This is actually font color.
-			lbl_paused.setVisible(false);
-			add(lbl_paused);
-		}
-
-		@Override
-		protected void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			setBackground(Color.BLACK);
-
-			// Deal with Paused/unpaused game
-			if (state == GameState.Paused) {
-				lbl_paused.setVisible(true);
-				setBackground(Color.DARK_GRAY);
-				g.setColor(Color.LIGHT_GRAY);
-			} else {
-				lbl_paused.setVisible(false);
-				g.setColor(Color.WHITE);
-			}
-
-			// draw game objects
-			p1.draw(g);
-			p2.draw(g);
-			b.draw(g);
-		}
-	
-		public void keyPressed(KeyEvent ke) {
-			switch (ke.getKeyCode()) {
-			case KeyEvent.VK_W:
-				p1.setMovement(-1);
-				break;
-			case KeyEvent.VK_S:
-				p1.setMovement(1);
-				break;
-			case KeyEvent.VK_UP:
-				p2.setMovement(-1);
-				break;
-			case KeyEvent.VK_DOWN:
-				p2.setMovement(1);
-				break;
-			case KeyEvent.VK_P:
-				if (state == GameState.Running)
-					state = GameState.Paused;
-				else if (state == GameState.Paused)
-					state = GameState.Running;
-				break;
-			default:
-				break;
-			}
-		}
-
-		public void keyReleased(KeyEvent ke) {
-			switch (ke.getKeyCode()) {
-			case KeyEvent.VK_W:
-				p1.setMovement(0);
-				break;
-			case KeyEvent.VK_S:
-				p1.setMovement(0);
-				break;
-			case KeyEvent.VK_UP:
-				p2.setMovement(0);
-				break;
-			case KeyEvent.VK_DOWN:
-				p2.setMovement(0);
-				break;
-			default:
-				break;
-			}
-		}
-
-		public void keyTyped(KeyEvent ke) {
-		}
-	}
-
-	/*******************************************************************************/
-	/* *INNER CLASS WelcomeSCREEN* */
-	/*******************************************************************************/
-
-	/**
-	 * Panel on which the welcome screen is drawn.
-	 * 
-	 * This class provide a canvas by extending a JPanel class. This screen
-	 * contains a welcome msg and buttons to sart the game modes.
-	 * 
-	 * @author WissenIstNacht
-	 */
-	class WelcomeScreen extends JPanel implements ActionListener {
-		private static final long serialVersionUID = 3732454082115626205L;
-
-		private JButton b_singlePlayer, b_twoPlayer;
-		private JButton b_settings;
-		private JButton b_fill;
-
-		private JLabel lbl_welcome;
-
-		/**
-		 * Initializes Welcome screen by adding layout and various components
-		 */
-		public WelcomeScreen() {
-			setBackground(Color.DARK_GRAY);
-			/* Layout */
-			int noRow = 7;
-			int noCol = 5;
-			setLayout(new GridLayout(noRow, noCol, 0, 20));
-
-			/* Components */
-			b_singlePlayer = new JButton("Single Player");
-			b_singlePlayer.addActionListener(this);
-			b_twoPlayer = new JButton("Two Player");
-			b_twoPlayer.addActionListener(this);
-			b_settings = new JButton("Settings");
-			b_settings.addActionListener(this);
-
-			// Add invisible buttons to fill layout.
-			for (int i = 0; i < noRow * noCol; i++) {
-				b_fill = new JButton("Some" + i);
-
-				switch (i) {
-				case 17:
-					add(b_singlePlayer);
-					break;
-				case 22:
-					add(b_twoPlayer);
-					break;
-				case 27:
-					add(b_settings);
-					break;
-				default:
-					b_fill.setVisible(false);
-					b_fill.setEnabled(false);
-					add(b_fill);
-					break;
-				}
-			}
-		}
-
-		/**
-		 * Overwrite function inherited by JPanel
-		 * 
-		 * This is used to draw the welcome message on the panel. (This is done
-		 * because the layout created for the buttons on this panel does no
-		 * longer allow to place a label.
-		 * 
-		 * @param g
-		 */
-		protected void paintComponent(Graphics g) {
-			super.paintComponent(g);
-			g.setColor(Color.WHITE);
-			g.setFont(new Font("Verdana", Font.BOLD, 50));
-			String welcomeMsg = "Welcome to Pong!";
-
-			int xPos = (getWidth() - g.getFontMetrics().stringWidth(welcomeMsg))
-					/ 2;
-			int yPos = getHeight() / 3 - 50 / 2;
-			g.drawString("Welcome to Pong!", xPos, yPos);
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			if (e.getSource().equals(b_singlePlayer)) {
-				welcomeToRunning(true);
-				state = GameState.Running;
-			} else if (e.getSource().equals(b_twoPlayer)) {
-				welcomeToRunning(false);
-				state = GameState.Running;
-			} else if (e.getSource().equals(b_settings)) {
-				// Not sure if we should have settings.
-				state = GameState.Settings;
-			}
-
-		}
-
-	}
 
 	/*******************************************************************************/
 	/* *INNER CLASS GameOverScreen* */
